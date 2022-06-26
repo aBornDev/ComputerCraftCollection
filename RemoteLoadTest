@@ -9,6 +9,6 @@ function log(text)
 	end
 end
 
-log("this is a test")
+log("this is a test x2")
 log("wait it is working?")
 log("gib me code from web?")
