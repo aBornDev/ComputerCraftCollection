@@ -66,7 +66,7 @@ end
 function log(text)
 	local default = "no message"
 	append = text or (text == nil and default)
-	msg = "turtle(" .. os.getComputerID() .. "):".. append
+	msg = "turtle(" .. os.getComputerID() .. "): ".. append
 	print(msg)
 	if(peripheral.isPresent("top")) then
 		chat = peripheral.wrap("top")
@@ -77,7 +77,7 @@ end
 function minerPickUp()
 	sleep(1)
 	checkStats()
-	print("Picking up the builder for transport at", os.date("%H:%M"))
+	log("Picking up the builder for transport at" .. os.date("%H:%M"))
 	turtle.select(6) -- chat box
 	turtle.digUp()
 	turtle.select(2) -- miner
@@ -95,7 +95,7 @@ function minerPickUp()
 	turtle.select(3) -- Quantum entangloporter
 	turtle.dig()
 	forward(1)
-	print("The builder has been picked up for transport at ", os.date("%H:%M"))
+	log("The builder has been picked up for transport at " .. os.date("%H:%M"))
 	moveChunk()
 end
 
@@ -158,6 +158,8 @@ function runningCheck()
 		sleep(60)
 		runningCheck()
 	else
+		turtle.select(6) -- chat box
+		turtle.placeUp()
 		log("Error: Something isn't in the right place, Will now try to place teleporter and terminate. " .. os.date("%H:%M"))
 		turtle.select(4) -- teleporter
 		turtle.place()
@@ -176,7 +178,7 @@ function main( task )
 	elseif task == "check" then
 		runningCheck()
 	else
-		print("413: instructions unclear. I'm a teapot")
+		log("413: instructions unclear. I'm a teapot")
 	end
 	runningCheck()
 end
