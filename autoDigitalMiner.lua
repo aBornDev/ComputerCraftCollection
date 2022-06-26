@@ -66,13 +66,20 @@ end
 function log(text)
 	local default = "no message"
 	append = text or (text == nil and default)
-	print("turtle(" .. os.getComputerID() .. "):".. append)
+	msg = "turtle(" .. os.getComputerID() .. "):".. append
+	print(msg)
+	if(peripheral.isPresent("top")) then
+		chat = peripheral.wrap("top")
+		chat.sendMessage(msg)
+	end
 end
 
 function minerPickUp()
 	sleep(1)
 	checkStats()
 	print("Picking up the builder for transport at", os.date("%H:%M"))
+	turtle.select(6) -- chat box
+	turtle.digUp()
 	turtle.select(2) -- miner
 	turtle.digDown()
 	down(1)
@@ -119,6 +126,8 @@ function minerBuild()
 	turtle.placeDown()
 	reverse()
 	forward(2)
+	turtle.select(6)
+	turtle.placeUp()
 	log("Finished the build of the builder at " .. os.date("%H:%M"))
 	
 	runningCheck()
@@ -145,7 +154,7 @@ function runningCheck()
 				minerPickUp()
 			end
 		end
-		
+
 		sleep(60)
 		runningCheck()
 	else
