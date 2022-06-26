@@ -1,0 +1,12 @@
+function log(text)
+	local default = "no message"
+	append = text or (text == nil and default)
+	msg = "turtle(" .. os.getComputerID() .. "):".. append
+	print(msg)
+	if(peripheral.isPresent("top")) then
+		chat = peripheral.wrap("top")
+		chat.sendMessage(msg)
+	end
+end
+
+log("this is a test")
