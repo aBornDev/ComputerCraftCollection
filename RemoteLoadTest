@@ -10,3 +10,5 @@ function log(text)
 end
 
 log("this is a test")
+log("wait it is working?")
+log("gib me code from web?")
