@@ -1,11 +1,12 @@
 local check = false;
+local args = { ... }
 
 function checkStats()
     if turtle.getFuelLevel() < 1000 then
         refuel()
     end
 end
- 
+
 function refuel()
     log( "Refueling..." )
  	reverse()
@@ -21,15 +22,15 @@ function reverse()
     turn( "r" )
     turn( "r" )
 end
- 
+
 function turn( direction )
     if direction == "r" then
         turtle.turnRight()
- 
+
         return true
     elseif direction == "l" then
         turtle.turnLeft()
- 
+
         return true
     else
         return false
@@ -77,7 +78,7 @@ end
 function minerPickUp()
 	sleep(1)
 	checkStats()
-	log("Picking up the builder for transport at" .. os.date("%H:%M"))
+	log("Picking up the builder for transport at " .. os.date("%H:%M"))
 	turtle.select(6) -- chat box
 	turtle.digUp()
 	turtle.select(2) -- miner
@@ -128,15 +129,14 @@ function minerBuild()
 	forward(2)
 	turtle.select(6)
 	turtle.placeUp()
-	log("Finished the build of the builder at " .. os.date("%H:%M"))
-	
+	sleep(1)
+	log("Finished the build of the miner at " .. os.date("%H:%M"))
 	runningCheck()
 end
 
 function runningCheck()
 	checkStats()
 	local miner
-	
 	if(peripheral.isPresent("bottom")) then
 		miner = peripheral.wrap("bottom")
 		if(not check) then
@@ -144,7 +144,6 @@ function runningCheck()
 			check = true;
 			runningCheck();
 		end
-		
 		if miner.getEnergyUsage() == 0 then
 			if miner.getState() == "IDLE" then
 				miner.start()
@@ -160,13 +159,13 @@ function runningCheck()
 	else
 		turtle.select(6) -- chat box
 		turtle.placeUp()
-		log("Error: Something isn't in the right place, Will now try to place teleporter and terminate. " .. os.date("%H:%M"))
+		log("Error 404: Miner not found, Will now try to place teleporter and terminate. " .. os.date("%H:%M"))
 		turtle.select(4) -- teleporter
 		turtle.place()
 		turtle.placeUp()
 		turtle.placeDown()
 		error()
-	end	
+	end
 end
 
 function main( task )
@@ -179,6 +178,7 @@ function main( task )
 		runningCheck()
 	else
 		log("413: instructions unclear. I'm a teapot")
+		sleep(1)
 	end
 	runningCheck()
 end
@@ -186,6 +186,6 @@ end
 -- write( "What should I do with the builder? pickup, build, or check : \n" )
 -- task = read()
 -- task = task:lower()
-
+task = args[1]
 
 main(task)
