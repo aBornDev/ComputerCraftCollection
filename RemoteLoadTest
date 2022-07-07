@@ -10,5 +10,9 @@ function log(text)
 end
 
 log("this is a test x2")
+sleep(1)
 log("wait it is working?")
+sleep(1)
 log("gib me code from web?")
+sleep(1)
+log("Am I alive?")
