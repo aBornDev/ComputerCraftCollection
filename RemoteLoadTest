@@ -20,7 +20,7 @@ sleep(1)
 log("Am I alive?")
 sleep(1)
 log("Alive I am")
-if #args ~= 1 then
+if #args == 1 then
     sleep(1)
-    log("And parameters I recive" .. args[1])
+    log("And parameters I recive: " .. args[1])
 end
