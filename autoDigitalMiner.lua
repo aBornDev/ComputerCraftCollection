@@ -1,191 +1,141 @@
-local check = false;
+--- Digital miner: builds a Mekanism digital miner setup, waits until it is done,
+-- breaks it down, moves one chunk (64 blocks) and starts over.
+--
+-- Usage: autoDigitalMiner [check|build|pickup]   (default: check)
+
+local utils = require("lib.turtleUtils")
+local log, reverse = utils.log, utils.reverse
+local forward, up, down = utils.forward, utils.up, utils.down
+
 local args = { ... }
 
-function checkStats()
-    if turtle.getFuelLevel() < 1000 then
-        refuel()
+-- Seconds between two checks of the miner.
+local CHECK_INTERVAL = 60
+-- Distance (in blocks) to the next mining location.
+local MOVE_DISTANCE = 64
+
+local SLOT = {
+    fuel           = 1,  -- container with fuel
+    miner          = 2,  -- digital miner
+    entangloporter = 3,  -- quantum entangloporter
+    teleporter     = 4,
+    lootChest      = 5,  -- ender chest for the loot
+    chatBox        = 6,
+}
+
+local function checkStats()
+    if utils.needsFuel() then
+        log("Refueling...")
+        reverse()
+        utils.refuelFromChest(SLOT.fuel, "front")
+        reverse()
     end
 end
 
-function refuel()
-    log( "Refueling..." )
- 	reverse()
-    turtle.select(1)
-    turtle.place()
-    turtle.suck(64)
-    turtle.refuel(64)
-    turtle.dig()
+local function pickUp()
+    checkStats()
+    log("Picking up the miner for transport at " .. utils.time())
+    turtle.select(SLOT.chatBox)
+    turtle.digUp()
+    turtle.select(SLOT.miner)
+    turtle.digDown()
+    down(1)
     reverse()
+    forward(1)
+    turtle.select(SLOT.lootChest)
+    turtle.dig()
+    down(1)
+    turtle.select(SLOT.teleporter)
+    turtle.digDown()
+    down(1)
+    reverse()
+    turtle.select(SLOT.entangloporter)
+    turtle.dig()
+    forward(1)
+    log("The miner has been picked up for transport at " .. utils.time())
 end
 
-function reverse()
-    turn( "r" )
-    turn( "r" )
+local function moveChunk()
+    forward(MOVE_DISTANCE)
 end
 
-function turn( direction )
-    if direction == "r" then
-        turtle.turnRight()
+local function build()
+    checkStats()
+    log("Initiating the build of the miner at " .. utils.time())
+    reverse()
+    turtle.select(SLOT.miner)
+    turtle.placeUp()
+    reverse()
+    down(1)
+    turtle.select(SLOT.entangloporter)
+    turtle.placeUp()
+    reverse()
+    forward(1)
+    turtle.select(SLOT.teleporter)
+    turtle.placeUp()
+    forward(1)
+    up(4)
+    turtle.select(SLOT.lootChest)
+    turtle.placeDown()
+    reverse()
+    forward(2)
+    turtle.select(SLOT.chatBox)
+    turtle.placeUp()
+    sleep(1)
+    log("Finished the build of the miner at " .. utils.time())
+end
 
-        return true
-    elseif direction == "l" then
-        turtle.turnLeft()
+--- Places a teleporter so the turtle can be reached, then stops the program.
+local function failSafe()
+    turtle.select(SLOT.chatBox)
+    turtle.placeUp()
+    log("Error 404: Miner not found, will now try to place a teleporter and terminate. " .. utils.time())
+    turtle.select(SLOT.teleporter)
+    turtle.place()
+    turtle.placeUp()
+    turtle.placeDown()
+    error("Miner not found", 0)
+end
 
-        return true
-    else
-        return false
+--- Keeps the miner running and returns when it has finished.
+local function waitUntilFinished()
+    checkStats()
+    if not peripheral.isPresent("bottom") then
+        failSafe()
+    end
+
+    local miner = peripheral.wrap("bottom")
+    log("Starting the quarrying check of the miner at " .. utils.time())
+
+    while true do
+        if miner.getEnergyUsage() == 0 then
+            if miner.getState() == "IDLE" then
+                miner.start()
+            else
+                log("Quarrying finished at " .. utils.time())
+                return
+            end
+        end
+        sleep(CHECK_INTERVAL)
     end
 end
 
-function forward(count)
-  	local default = 1
-  	count = count or (count == nil and default)
+local task = (args[1] or "check"):lower()
 
-	for i=1,count do
-        turtle.forward()
-    end
+if task == "build" then
+    build()
+elseif task == "pickup" then
+    pickUp()
+    moveChunk()
+    build()
+elseif task ~= "check" then
+    log("413: instructions unclear. I'm a teapot. Use: check, build or pickup")
+    return
 end
 
-function up(count)
-  	local default = 1
-  	count = count or (count == nil and default)
-
-	for i=1,count do
-        turtle.up()
-    end
+while true do
+    waitUntilFinished()
+    pickUp()
+    moveChunk()
+    build()
 end
-
-function down(count)
-  	local default = 1
-  	count = count or (count == nil and default)
-
-	for i=1,count do
-        turtle.down()
-    end
-end
-
-function log(text)
-	local default = "no message"
-	append = text or (text == nil and default)
-	msg = "turtle(" .. os.getComputerID() .. "): ".. append
-	print(msg)
-	if(peripheral.isPresent("top")) then
-		chat = peripheral.wrap("top")
-		chat.sendMessage(msg)
-	end
-end
-
-function minerPickUp()
-	sleep(1)
-	checkStats()
-	log("Picking up the builder for transport at " .. os.date("%H:%M"))
-	turtle.select(6) -- chat box
-	turtle.digUp()
-	turtle.select(2) -- miner
-	turtle.digDown()
-	down(1)
-	reverse()
-	forward(1)
-	turtle.select(5) -- loot ender chest
-	turtle.dig()
-	down(1)
-	turtle.select(4) -- teleporter
-	turtle.digDown()
-	down(1)
-	reverse()
-	turtle.select(3) -- Quantum entangloporter
-	turtle.dig()
-	forward(1)
-	log("The builder has been picked up for transport at " .. os.date("%H:%M"))
-	moveChunk()
-end
-
-function moveChunk()
-	forward(64)
-	minerBuild()
-end
-
-
--- TODO: Refactor to use helper function
-function minerBuild()
-	checkStats()
-	log("Initiating the build of the miner at " .. os.date("%H:%M"))
-	reverse()
-	turtle.select(2) -- miner
-	turtle.placeUp()
-	reverse()
-	down(1)
-	turtle.select(3) -- Quantum entangloporter
-	turtle.placeUp()
-	reverse()
-	forward(1)
-	turtle.select(4) -- teleporter
-	turtle.placeUp()
-	forward(1)
-	up(4)
-	turtle.select(5)
-	turtle.placeDown()
-	reverse()
-	forward(2)
-	turtle.select(6)
-	turtle.placeUp()
-	sleep(1)
-	log("Finished the build of the miner at " .. os.date("%H:%M"))
-	runningCheck()
-end
-
-function runningCheck()
-	checkStats()
-	local miner
-	if(peripheral.isPresent("bottom")) then
-		miner = peripheral.wrap("bottom")
-		if(not check) then
-			log("starting the Quarrying check of the miner " .. os.date("%H:%M"))
-			check = true;
-			runningCheck();
-		end
-		if miner.getEnergyUsage() == 0 then
-			if miner.getState() == "IDLE" then
-				miner.start()
-			else
-				log("Quarrying Finished at " .. os.date("%H:%M"))
-				check = false;
-				minerPickUp()
-			end
-		end
-
-		sleep(60)
-		runningCheck()
-	else
-		turtle.select(6) -- chat box
-		turtle.placeUp()
-		log("Error 404: Miner not found, Will now try to place teleporter and terminate. " .. os.date("%H:%M"))
-		turtle.select(4) -- teleporter
-		turtle.place()
-		turtle.placeUp()
-		turtle.placeDown()
-		error()
-	end
-end
-
-function main( task )
-	if task == "build" then
-		minerBuild()
-	elseif task == "pickup" then
-		minerPickUp()
-
-	elseif task == "check" then
-		runningCheck()
-	else
-		log("413: instructions unclear. I'm a teapot")
-		sleep(1)
-	end
-	runningCheck()
-end
-
--- write( "What should I do with the builder? pickup, build, or check : \n" )
--- task = read()
--- task = task:lower()
-task = args[1]
-
-main(task)
