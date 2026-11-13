@@ -2,7 +2,7 @@
 stds.computercraft = {
     read_globals = {
         "turtle", "peripheral", "sleep", "read", "write", "colors", "colours",
-        "term", "fs", "http", "shell", "textutils", "rednet", "redstone",
+        "term", "fs", "http", "shell", "textutils", "rednet", "redstone", "settings",
         os = { fields = { "getComputerID", "pullEvent", "pullEventRaw", "startTimer", "epoch", "day" } },
     },
 }

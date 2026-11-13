@@ -73,6 +73,35 @@ the current layer and returns home.
 Shows buttons on a monitor. The `spawner` button sends `on`/`off` on modem channel 3.
 Needs a monitor and a modem.
 
+### claudeChat
+
+Chat with Claude from any computer or turtle through the Anthropic API.
+
+```
+set claude.key sk-ant-...     (once; get a key at console.anthropic.com)
+claudeChat
+```
+
+Commands: `/reset` starts a new conversation, `/usage` shows the tokens used, `/exit` quits.
+
+Optional settings (`set <name> <value>`):
+
+| Setting | Default | Meaning |
+| ------- | ------- | ------- |
+| `claude.model` | `claude-opus-5-5` | Model to use |
+| `claude.effort` | `low` | `low`, `medium`, `high`, `xhigh` or `max`: higher thinks longer and costs more |
+| `claude.max_tokens` | `1024` | Maximum length of one answer |
+
+Notes:
+
+- Needs the HTTP API enabled in the CC: Tweaked config (on by default).
+- Every question is a paid API request. The whole conversation is sent each time (with prompt
+  caching), so use `/reset` for a new topic.
+- The key is stored on the computer. On a shared server, admins and anyone who can open the
+  computer can read it.
+- If Claude declines a request, the API retries it on another model automatically
+  (server-side fallback).
+
 ### remoteLoadTest
 
 Checks that running a program straight from the web works:

@@ -11,6 +11,7 @@ local FILES = {
     "autoDigitalMiner.lua",
     "betterExcavate.lua",
     "touchScreen.lua",
+    "claudeChat.lua",
     "remoteLoadTest.lua",
     "install.lua",
 }
